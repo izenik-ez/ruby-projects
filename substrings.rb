@@ -1,18 +1,12 @@
-def count_substrings (string, substring)
-  count = string.scan(substring).length
-  if count != 0
-    { string: substring, count: count }
-  else
-    nil
-  end
-end
-
-#puts "#{count_substrings "below", "low"}"
-
 def substrings (string, dictionary)
   hash = Hash.new(0)
   dictionary.each do |dict|
-    match = count_substrings string, dict
-    hash << match if match
+    matches = string.downcase.scan(dict.downcase).length
+    hash[dict] += matches if matches != 0
   end
+  hash
 end
+
+dictionary = ["below","down","go","going","horn","how","howdy","it","i","low","own","part","partner","sit"]
+puts substrings("Howdy partner, sit down! How's it going?", dictionary)
+
