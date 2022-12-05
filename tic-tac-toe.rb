@@ -31,11 +31,12 @@ class Board
   end
 
   def ask_for_move (player)    
-    puts "#{player.name}'s turn!" 
+    puts "#{player.name}'s turn!"
+    puts ""
     move = [0,0]
-    print "ROW: "
+    print "     ROW: "
     move[0] = gets.chomp.to_i
-    print "COLUMN: "
+    print "     COLUMN: "
     move[1] = gets.chomp.to_i
     move
   end
@@ -120,57 +121,50 @@ class Board
       false
     end
   end
-
-  def winner
-    if winner? @player1
-      player1
-    elsif winner? @player2
-      player2
-    else
-      ""
-    end
-  end
 end
 
 
-
-board = Board.new
-p1 = Player.new
-p2 = Player.new
-
-winner = false
-row = "" 
-column = ""
-
-until board.complete_board?
-
-  board.show_board
-    
-  begin
-    movement = board.ask_for_move p1
-  end  until board.move_allowed? movement[0].to_i, movement[1].to_i
-  board.move movement[0], movement[1], p1
-  if board.winner? p1
-    puts "Player 1 WINS!"
-    winner = true
-    break
+class Game
+  def initialize
+    @board = Board.new
+    @player1 = Player.new
+    @player2 = Player.new
+    @winner = false
+    #@row    = -1
+    #@column = -1
   end
 
-  break if board.complete_board?    
-  
-  board.show_board
-  
-  begin
-    movement = board.ask_for_move p2
-  end until board.move_allowed? movement[0].to_i, movement[1].to_i
-  board.move movement[0].to_i, movement[1].to_i, p2  
-  
-  if board.winner? p2
-    puts "Player 2 WINS!"
-    winner = true
-    break
-  end    
-end# until board.complete_board?
+  def player_move (p)
+    movement = [-1,-1]
+    begin
+      movement = @board.ask_for_move p
+    end until @board.move_allowed? movement[0].to_i, movement[1].to_i
+    
+    @board.move movement[0].to_i, movement[1].to_i, p
+    
+    if @board.winner? p
+      puts "#{p.name} WINS"
+      @winner = true
+    end
+  end
 
-puts "Nobody Wins!" unless winner
+  def game_loop
+    #until @board.complete_board?
+    loop do
+      @board.show_board
+
+      player_move @player1
+      break if @winner || @board.complete_board?
+
+      @board.show_board
+     # break if @board.complete_board?
+      player_move @player2
+      break if @winner || @board.complete_board?
+    end
+    puts "Nobody Wins!" unless @winner
+  end  
+end
+
+g = Game.new
+g.game_loop
 
