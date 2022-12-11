@@ -53,6 +53,35 @@ def save_thank_you_letter(id, form_letter)
 end
 
 
+def most_common_hour(contents)
+  reg_hours = []  
+  contents.each do |row|    
+    reg_date = row[:regdate]    
+    reg_hours << Time.strptime(reg_date, '%m/%d/%y %H:%M').hour
+  end
+  common_hour = reg_hours.reduce(Hash.new(0)) do |h, hour|
+    h[hour] += 1
+    h
+  end
+
+  common_hour.max_by{|k, v| v}[0]
+  
+end
+
+def most_common_day(contents)
+  reg_day = []
+
+  contents.each do |row|
+    reg_date = row[:regdate]
+    reg_day << Time.strptime(reg_date, '%m/%d/%y %H:%M').strftime('%A')
+  end
+  common_day = reg_day.reduce(Hash.new(0)) do |h, day|
+    h[day] += 1
+    h
+  end
+
+  common_day.max_by{|k, v| v}[0]
+end
 
 puts "EventManager initialized."
 
@@ -63,29 +92,24 @@ contents = CSV.open('event_attendees.csv',
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 
-def clean_zipcode_old(zipcode)
-  if zipcode.nil?
-    '00000'
-  elsif zipcode.length < 5
-    zipcode.rjust(5,'0')
-  elsif zipcode.length > 5
-    zipcode[0..4]
-  else
-    zipcode
-  end
-end
 
 
 
-contents.each do |row|
-  id = row[0]
-  name = row[:first_name]
-  zipcode = clean_zipcode(row[:zipcode])
+puts "\nThe most common hour of registration is: #{most_common_hour contents}:00"
 
-  legislators = legislators_by_zipcode(zipcode)
+contents.rewind
+puts "\nThe most common registration day is: #{most_common_day contents}"
+# contents.each do |row|
+#   id = row[0]
+#   name = row[:first_name]
+#   zipcode = clean_zipcode(row[:zipcode])
 
-  form_letter = erb_template.result(binding)
-  phone = row[:homephone]
-  puts phone
-  #save_thank_you_letter(id, form_letter)
-end
+#   legislators = legislators_by_zipcode(zipcode)
+
+#   form_letter = erb_template.result(binding)
+#   phone = row[:homephone]
+#   puts phone
+  
+#   puts "\nThe most common hour of registration is: #{most_common_hour}:00"
+#   #save_thank_you_letter(id, form_letter)
+# end
