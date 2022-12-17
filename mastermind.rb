@@ -1,101 +1,133 @@
-def colors ()
-  ["Red", "Yellow", "Blue", "Orange", "Green", "Violet"]
-end
-
-def ask_for_color(total)
-  color_guess = []
-  puts "Allowed colors: #{colors}"
-  total.times do |i|
-    print "##{i+1}> "
-    guess = gets.chomp.downcase.capitalize
-    if colors.include? guess
-      color_guess[i] = guess
-    else
-      redo
-    end
+class Pegs
+  @@colors = ["Red", "Yellow", "Blue", "Orange", "Green", "Violet"]
+  def self.correct_position
+    "W"
   end
-  color_guess
-end
-
-print "Colors: "
-puts colors.include? "xx"
-
-def get_secret_code (total, colors, duplicates: nil)
-  color_code = []
-  total.times do |n|
-    color = colors[rand(colors.length)]
-    if duplicates && color_code.include?(color)
-      redo
-    else
-      color_code << color
-    end
+  def self.color_included
+    "R"
   end
-  color_code
-end
-
-def check_user_guess(guess, secret_color_code)
-  puts "Secret Color Code: #{secret_color_code}"
-  output = Array.new(guess.length, nil)
-  guess.each_with_index do |g, i|
-    output[i] = "!" if secret_color_code.include? g
-    output[i] = "O" if g == secret_color_code[i]
+  def self.colors
+    #["Red", "Yellow", "Blue", "Orange", "Green", "Violet"]
+    @@colors
   end
-  output
-end
-
-game = {secret_color_code: get_secret_code(4, colors),
-        board: Array.new(12, Array.new(4)),
-        board_output: Array.new(12, Array.new(4))}
-
-def print_round(round, check)
-  max_length = colors.max{|s| s.length}.length
-  round.each{|r| print r.center(max_length+5)}
-  puts
-  check.each do |c|
-    if c.nil?
-      print(' ' * (max_length+5))
-    else
-      print c.center(max_length+5)
-    end
+  def self.colors_include?(color)
+    @@colors.include? color
   end
 end
-
-
-def print_board (game_hash)
-  game_hash[:board].each_with_index do |round, i|
-    unless round.any? nil      
-      print_round round, game_hash[:board_output][i]      
-      puts
-    end
-  end
-end
-
-def game_end?(user_guess, secret_color_code)
-  user_guess == secret_color_code
-end
-
-def end_banner(last_round, last_output)
-  len = [last_round.to_s.length, last_output.to_s.length].max
-  (len+5).times{|l| print "="}
-  puts
-  print_round last_round, last_output
-  puts
-  (len+5).times{|l| print "="}
-end
-
-12.times do |i|  
-  user_guess = ask_for_color 4 
-  game[:board][i] = user_guess
-  game[:board_output][i] = check_user_guess(user_guess, game[:secret_color_code])
-  if game[:board][i] == game[:secret_color_code]
-    #puts "====================="
-    #puts "You guess the color!"
-    #puts "====================="
-    #print_round game[:board][i], game[:board_output][i]
-    end_banner game[:board][i], game[:board_output][i]
-    puts
-    break
-  end
-    print_board game
-end
+    
+class Board
+  include 'Pegs'
+  attr_reader :colors, :secret_code,
+              :total, :duplicates,
+              :played_pegs,
+              :checked_pegs
+    
   
+  def initialize(size, duplicates: nil)
+    @colors = Pegs.colors    
+    @size = size
+    @duplicates = duplicates
+    @secret_code = set_secret_code
+    @played_pegs = Array.new(@size, Array.new(@size, nil))
+    @checked_pegs = Array.new(@size, Array.new(@size, nil))    
+  end
+
+  def add_played_pegs (pegs)
+    @played_pegs << pegs
+    add_checked_pegs(check_played_pegs @played_pegs.last)    
+  end
+
+  def get_played_pegs (i)
+    @played_pegs[i]
+  end
+    
+  def add_checked_pegs (pegs)
+    @checked_pegs << pegs
+    @checked_pegs.last
+  end
+
+  def get_checked_pegs(i)
+    @checked_pegs[i]
+  end
+
+  #def color_include? (color)
+  #  @colors.include? color
+  #end
+  
+  private
+  
+  def check_played_pegs (pegs)
+    checked = Array.new[@size]
+    pegs.each_with_index do |peg, i|
+      if peg == @secret_code[i]
+        checked[i] = Pegs.correct_position
+      elsif color_include? peg
+        checked[i] = Pegs.color_included
+      end
+    end
+    checked
+  end  
+
+  def set_secret_code
+    secret_color_code = []
+    color = ""
+    @size.times do |i|
+      color = colors[rand(@colors.length)]
+      redo if @duplicates && secret_color_code.include?(color)
+      secret_color_code << color
+    end    
+    secret_color_code
+  end      
+end
+
+
+class Interfaze
+  def ask_for_color(total)
+    played_pegs = []
+    puts "Allowed colors: #{Pegs.colors}"
+    total.times do |i|
+      print "##{i+1}> "
+      color_guess = gets.chomp.downcase.capitalize
+      if Pegs.colors_include? color_guess
+        color_guess[i] = guess
+      else
+        redo
+      end
+    end
+    played_pegs
+  end
+
+  def print_pegs (played_pegs, checked_pegs)
+    offset = 5
+    # Get the longer color name and his length
+    max_length = Pegs.colors.max{|color| color.length}.length
+    played_pegs.each{|peg| print peg.center(max_length+offset)}
+    puts
+    checked_pegs do |peg|
+      if peg.nil?
+        print (' ' * (max_length+offset))
+      else
+        print peg.center(max_length+offset)
+      end
+    end
+  end
+
+  def print_board(board)
+    board.played_pegs.each_with_index do |pegs, i|
+      unless pegs.any? nil
+        print_pegs(pegs, board.get_checked_pegs(i))
+        puts
+      end      
+    end
+  end
+  
+  def end_banner(played_pegs, checked_pegs)
+    offset = 5
+    len = [played_pegs.to_s.length, checked_pegs.to_s.length].max
+    header = "=" * (len+offset)
+    header += "\n"
+    print header
+    print_pegs played_pegs, checked_pegs
+    print header
+  end
+end
