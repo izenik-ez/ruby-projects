@@ -35,6 +35,10 @@ class HangmanDraw
       puts
     end
   end
+
+  def hanged?
+    @moves == 9 ? true : false
+  end
   
 end
 
@@ -80,7 +84,7 @@ class Board
     @secret_word = SecretWord.new.secret_word
     @board = create_board
     @user_guess = ""
-    @draw = HangmanDraw.new
+    @hang = HangmanDraw.new
   end
 
   def print_board
@@ -88,27 +92,32 @@ class Board
     puts
   end
   def user_move(round)
-    print "#{round+1} Guess a letter > "
+    print "#{round} Guess a letter > "
     @user_guess = gets.chomp.downcase
-    puts
+    puts    
   end
 
   def play
-    8.times do |round|      
-      puts "CHEATER!! #{@secret_word}"
-      user_move round
-      if replace_letter_in_board.length == 0
-        @draw.wrong_guess
-      else
-        @draw.draw
+    round = 0
+    loop do
+      return [false, @secret_word] if @hang.hanged?
+      if @user_guess == @secret_word ||
+         @board == @secret_word
+        return [true,@secret_word]
       end
 
-      print_board
-      if @board  == @secret_word
-        return @secret_word
+      round += 1
+      puts "CHEATER!! #{@secret_word}"
+      user_move round
+
+      if replace_letter_in_board.length == 0
+          @hang.wrong_guess
+        else
+          @hang.draw
       end
-    end
-    nil
+      
+      print_board
+    end      
   end
   
   private
@@ -135,8 +144,14 @@ end
 
 
 b = Board.new
-if b.play
-  puts "You win! Secret Word: #{b.secret_word}"
+
+
+# dump = Marshal.dump(b)
+# File.write("log.txt", dump)
+
+game = b.play
+if game[0]
+  puts "You win! Secret Word: #{game[1]}"
 else
-  puts "You loose!"
+  puts "You loose! Secret Word: #{game[2]}"
 end
