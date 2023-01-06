@@ -25,7 +25,7 @@ def merge_sort2(array)
   else
     left = merge_sort(array[0...array.size / 2])
     right = merge_sort(array[array.size / 2...array.size])
-    merge(left, right)
+    merge2(left, right)
   end
 end
 
@@ -48,6 +48,28 @@ def merge(left, right, array = [])
   end
   array
 end
+
+def merge2(left,right)
+  array = Array.new(left.size+right.size)
+  array.map do |item|
+    if left.empty?
+      right.shift
+    elsif right.empty?
+      left.shift
+    else
+      case left <=> right
+      when -1
+        left.shift
+      when 0
+        left.shift
+      when 1
+        right.shift
+      end
+    end
+  end  
+end
+
+
 
 arr = []
 rand(200).times do
