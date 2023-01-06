@@ -89,6 +89,22 @@ class LinkedList
     end
     return nil      
   end
+
+  def insert_at(value, index)
+    temp = @head
+    return nil if size < index
+    1.upto(index-1){|i| temp = temp.next_node}
+    temp_next_node = temp.next_node
+    temp.next_node = Node.new value, temp_next_node
+  end
+
+  def remove_at(index)
+    temp = @head
+    return nil if size < index
+    1.upto(index-1){|i| temp = temp.next_node}
+    temp_next_node = temp.next_node.next_node
+    temp.next_node = temp_next_node
+  end
   
   def to_s
     temp = @head
@@ -133,3 +149,10 @@ puts ll.find "hamar"
 
 print "Find value lau: "
 puts ll.find "lau"
+
+puts ll.to_s
+ll.insert_at("bost", 2)
+puts ll.to_s
+
+ll.remove_at 2
+puts ll.to_s
