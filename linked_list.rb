@@ -13,17 +13,23 @@ class LinkedList
   end
 
   def append (value)
-    new_value = Node.new value
     if @head.nil?
-      @head = new_value
+      @head = Node.new value
     elsif      
       temp = @head
       until temp.next_node.nil?        
         temp = temp.next_node
       end
-      temp.next_node = new_value
+      temp.next_node = Node.new value
     end
   end
+  # def append(value)
+  #   temp = @head
+  #   until temp.nil?
+  #     temp = temp.next_node
+  #   end
+  #   temp = Node.new value
+  # end
   
   def prepend (value)
     new_node = Node.new value
@@ -32,9 +38,11 @@ class LinkedList
   end
 
   def size
+    i = 0
+    return i if @head.nil?
     temp = @head
-    @head.nil? ? i = 0 : i=1
-    until temp.next_node.nil?
+
+    until temp.nil?
       i+= 1
       temp = temp.next_node
     end
@@ -42,6 +50,7 @@ class LinkedList
   end
 
   def tail
+    return nil if @head.nil?
     temp = @head
     until temp.next_node.nil?
       temp = temp.next_node
@@ -51,17 +60,22 @@ class LinkedList
 
   def at(index)
     return nil if @head.nil?
+    return nil if index > size
     temp = @head
-    1.upto(index){|i| temp = temp.next_node}
+    (index-1).times{|i| temp = temp.next_node}
     temp          
   end
 
   def pop
+    return nil if @head.nil?
     temp = @head
-    until temp.next_node.next_node.nil?
-      temp = temp.next_node.next_node
-    end    
-    temp.next_node = nil
+    prev = nil
+    until temp.nil? do
+      prev = temp
+      temp = temp.next_node
+    end
+    prev.next_node = nil
+    prev    
   end
 
   def contains?(value)
@@ -77,6 +91,7 @@ class LinkedList
   end
 
   def find(value)
+    return nil if @head.nil?
     temp = @head
     i = 1
     until temp.nil?
@@ -91,16 +106,16 @@ class LinkedList
   end
 
   def insert_at(value, index)
+    return nil if size < index    
     temp = @head
-    return nil if size < index
     1.upto(index-1){|i| temp = temp.next_node}
     temp_next_node = temp.next_node
     temp.next_node = Node.new value, temp_next_node
   end
 
   def remove_at(index)
+    return nil if size < index    
     temp = @head
-    return nil if size < index
     1.upto(index-1){|i| temp = temp.next_node}
     temp_next_node = temp.next_node.next_node
     temp.next_node = temp_next_node
@@ -117,6 +132,7 @@ class LinkedList
   end
 end
 
+=begin
 ll = LinkedList.new
 
 ll.append "bat"
@@ -156,3 +172,4 @@ puts ll.to_s
 
 ll.remove_at 2
 puts ll.to_s
+=end
