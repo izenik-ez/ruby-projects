@@ -19,7 +19,8 @@ class Tree
 
   def initialize(array)
     @array = array.uniq.sort
-    @root = Node.new
+    @root = nil
+    build_tree @array
   end
 
   def build_tree(array)
@@ -28,6 +29,8 @@ class Tree
     
     node = Node.new
     node.value = (array[mid])
+    @root = node if @root.nil?
+    
     node.left = build_tree(array[0...mid])
     node.right = build_tree(array[(mid+1)..-1])
 
@@ -46,4 +49,4 @@ tree = Tree.new [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]
 
 
 
-pretty_print tree.build_tree tree.array
+pretty_print tree.root
