@@ -35,7 +35,31 @@ class Tree
     node.right = build_tree(array[(mid+1)..-1])
 
     node
-  end  
+  end
+
+  def insert(value)
+    node = Node.new
+    node.value = value
+    @root = node if @root.nil?
+
+    prev = nil
+    temp = @root
+
+    while(temp)
+      prev = temp
+      if temp.value > value
+        temp = temp.left
+      elsif temp.value < value        
+        temp = temp.right
+      end
+    end
+
+    if prev.value > value
+      prev.left = node
+    else
+      prev.right = node
+    end
+  end
 
 end
 
@@ -47,6 +71,9 @@ end
 
 tree = Tree.new [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]
 
+root = tree.root
 
+pretty_print root
 
-pretty_print tree.root
+tree.insert 10
+pretty_print root
